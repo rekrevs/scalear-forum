@@ -1,0 +1,105 @@
+class Api::V1::PostsController < ApplicationController
+  # GET /api/v1/posts
+  # GET /api/v1/posts.json
+  def index
+      @api_v1_posts = Post.includes(:post_votes).all
+      @api_v1_posts.each do |a|
+          a.current_user_id = params[:user_id]
+      end
+
+    respond_to do |format|
+        format.json { render json: @api_v1_posts.to_json(:methods => [:votes_count, :user_vote, :user_flag]) }
+    end
+  end
+
+  # GET /api/v1/posts/1
+  # GET /api/v1/posts/1.json
+  def show
+    @api_v1_post = Post.find(params[:id])
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: @api_v1_post }
+    end
+  end
+
+  # GET /api/v1/posts/new
+  # GET /api/v1/posts/new.json
+  def new
+    @api_v1_post = Post.new
+
+    respond_to do |format|
+      format.html # new.html.erb
+      format.json { render json: @api_v1_post }
+    end
+  end
+
+  # GET /api/v1/posts/1/edit
+  def edit
+    @api_v1_post = Post.find(params[:id])
+  end
+
+  # POST /api/v1/posts
+  # POST /api/v1/posts.json
+  #def create
+  #  @api_v1_post = Api::V1::Post.new(params[:api_v1_post])
+  #
+  #  respond_to do |format|
+  #    if @api_v1_post.save
+  #      format.html { redirect_to @api_v1_post, notice: 'Post was successfully created.' }
+  #      format.json { render json: @api_v1_post, status: :created, location: @api_v1_post }
+  #    else
+  #      format.html { render action: "new" }
+  #      format.json { render json: @api_v1_post.errors, status: :unprocessable_entity }
+  #    end
+  #  end
+  #end
+  
+  def create
+    begin
+      #json = JSON.parse(request.body.read)
+      puts params[:content]
+      puts params[:user_id]
+      puts "json isssss"
+      #puts json.inspect
+      post = Post.create(:user_id => params[:user_id],:content => params[:content] )
+      if post.valid?
+        render :json => post.to_json
+      else
+        render :json => post.errors.to_json, :status => 400
+      end
+    rescue => e
+      puts e.message.inspect
+      render :json => e.message.to_json, :status => 500
+    end
+  end
+      
+
+  # PUT /api/v1/posts/1
+  # PUT /api/v1/posts/1.json
+  def update
+    @api_v1_post = Post.find(params[:id])
+
+    respond_to do |format|
+      if @api_v1_post.update_attributes(params[:api_v1_post])
+        format.html { redirect_to @api_v1_post, notice: 'Post was successfully updated.' }
+        format.json { head :no_content }
+      else
+        format.html { render action: "edit" }
+        format.json { render json: @api_v1_post.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # DELETE /api/v1/posts/1
+  # DELETE /api/v1/posts/1.json
+  def destroy
+    @api_v1_post = Post.find(params[:id])
+    @api_v1_post.destroy
+
+    respond_to do |format|
+      format.html { redirect_to api_v1_posts_url }
+      format.json { head :no_content }
+    end
+  end
+end

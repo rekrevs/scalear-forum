@@ -1,0 +1,12 @@
+# Sample localization file for English. Add more files in this directory for other locales.
+# See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
+
+sv:
+  hello: "Hello world"
+  activerecord:
+        errors:
+          models:
+            post_vote:
+              already_voted: 'Du kan bara rösta en gång per post'
+            post_flag:
+              already_flagged: 'Du kan bara flagga en gång per post'

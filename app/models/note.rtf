@@ -1,0 +1,26 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1265
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww13660\viewh9840\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\f0\fs24 \cf0 Note:\
+\
+It\'92s better not to namespace models.\
+\
+1- will have a different table for each version! api_v1_posts / api_v2_posts!\
+2- or could have same table, will need to set_table_name to posts, but then any association, the new name should be mentioned.\
+\
+This method is ok, if namespacing is not for versions, but for just dividing the app for better maintainability. This will be ok since I want a new table for everything. But not for versioning.. want same table!\
+\
+So instead, just create your own api/v1 and api/v2 folders inside the models folder. And add them to the config.autoload paths in the config/environment.rb\
+keep one table for all versions.. but different code..\
+However;\
+This way you can\'92t call Api::V1::Post to reference the first and Api::V2::Post to reference the other.. both are the same now.. will have to remove one. (remove one from the load path)\
+\
+Better.. just don\'92t namespace models!\
+\
+What if you want to change something in model in api2?\
+Simple, change it in the model, and in the old api controller, add the class there and inherit from the model and put the old code.\
+\
+So don\'92t scaffold with namespace, because you\'92ll have to go and change all table names in controllers and views.}
