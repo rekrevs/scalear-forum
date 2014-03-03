@@ -40,6 +40,7 @@ class Api::V1::CommentFlagsController < ApplicationController
   # POST /api/v1/comment_flags
   # POST /api/v1/comment_flags.json
   def create
+    if(Comment.find(params[:comment_flag][:comment_id]).user_id.to_i != params[:comment_flag][:user_id].to_i) # only flag if it's not the same user who wrote the comment!
       @api_v1_comment_flag=CommentFlag.find_by_comment_id_and_user_id(params[:comment_flag][:comment_id], params[:comment_flag][:user_id])
       if @api_v1_comment_flag.nil?
           @api_v1_comment_flag = CommentFlag.new(params[:comment_flag])
@@ -55,6 +56,9 @@ class Api::V1::CommentFlagsController < ApplicationController
           else
           @api_v1_comment_flag.destroy
           render json: {}
+      end
+      else
+         render json: "Can't flag yourself.", status: 400
       end
   end
 

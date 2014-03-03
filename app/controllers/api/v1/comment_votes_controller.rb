@@ -40,6 +40,7 @@ class Api::V1::CommentVotesController < ApplicationController
   # POST /api/v1/comment_votes
   # POST /api/v1/comment_votes.json
   def create
+    if(Comment.find(params[:comment_vote][:comment_id]).user_id.to_i != params[:comment_vote][:user_id].to_i) # only vote if it's not the same user who wrote the comment!
       @api_v1_comment_vote=CommentVote.find_by_comment_id_and_user_id(params[:comment_vote][:comment_id], params[:comment_vote][:user_id])
       if @api_v1_comment_vote.nil?
           @api_v1_comment_vote = CommentVote.new(params[:comment_vote])
@@ -56,6 +57,9 @@ class Api::V1::CommentVotesController < ApplicationController
               format.json { render json: @api_v1_comment_vote.errors.messages.values, status: 400 }
           end
       end
+     else
+        render json: "Can't vote for yourself.", status: 400
+     end
   end
 
   # PUT /api/v1/comment_votes/1

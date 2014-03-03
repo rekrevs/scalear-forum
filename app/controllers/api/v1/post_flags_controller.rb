@@ -40,6 +40,7 @@ class Api::V1::PostFlagsController < ApplicationController
   # POST /api/v1/post_flags
   # POST /api/v1/post_flags.json
   def create
+    if(Post.find(params[:post_flag][:post_id]).user_id.to_i != params[:post_flag][:user_id].to_i) # only flag if it's not the same user who wrote the post!
       @api_v1_post_flag=PostFlag.find_by_post_id_and_user_id(params[:post_flag][:post_id], params[:post_flag][:user_id])
       if @api_v1_post_flag.nil?
           @api_v1_post_flag = PostFlag.new(params[:post_flag])
@@ -56,6 +57,9 @@ class Api::V1::PostFlagsController < ApplicationController
           @api_v1_post_flag.destroy
           render json: {}
       end
+    else
+        render json: "Can't flag yourself.", status: 400
+    end
   end
 
   # PUT /api/v1/post_flags/1

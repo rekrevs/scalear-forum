@@ -74,7 +74,9 @@ class Api::V1::CommentsController < ApplicationController
   # DELETE /api/v1/comments/1.json
   def destroy
     @api_v1_comment = @post.comments.find(params[:id])
-    @api_v1_comment.destroy
+    if @api_v1_comment.user_id == params[:current_user_id].to_i  #can only delete my comment
+        @api_v1_comment.destroy
+    end
 
 #respond_to do |format|
 #      format.html { redirect_to api_v1_comments_url }
