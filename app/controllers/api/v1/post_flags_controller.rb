@@ -54,7 +54,7 @@ class Api::V1::PostFlagsController < ApplicationController
           end
       else
           @api_v1_post_flag.destroy
-          render json: {:msg => "destroyed"}
+          render json: {}
       end
   end
 

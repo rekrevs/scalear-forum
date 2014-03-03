@@ -8,3 +8,6 @@ class ApiConstraints
         @default || req.headers['Accept'].include?("application/vnd.forum.v#{@version}")
     end
 end
+
+
+#NOT WORKING ALWAYS RETURNS V1!!

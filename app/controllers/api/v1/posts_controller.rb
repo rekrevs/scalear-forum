@@ -2,7 +2,7 @@ class Api::V1::PostsController < ApplicationController
   # GET /api/v1/posts
   # GET /api/v1/posts.json
   def index
-      @api_v1_posts = Post.includes(:post_votes).all
+      @api_v1_posts = Post.includes(:post_votes).where(:lecture_id => params[:lecture_id])
       @api_v1_posts.each do |a|
           a.current_user_id = params[:user_id]
       end
@@ -58,13 +58,13 @@ class Api::V1::PostsController < ApplicationController
   def create
     begin
       #json = JSON.parse(request.body.read)
-      puts params[:content]
-      puts params[:user_id]
-      puts "json isssss"
+      puts params[:post]
+      #puts params[:user_id]
+      #puts "json isssss"
       #puts json.inspect
-      post = Post.create(:user_id => params[:user_id],:content => params[:content] )
+      post = Post.create(params[:post] )
       if post.valid?
-        render :json => post.to_json
+        render :json => post.to_json(:methods => [:votes_count, :user_vote, :user_flag])
       else
         render :json => post.errors.to_json, :status => 400
       end
@@ -97,9 +97,10 @@ class Api::V1::PostsController < ApplicationController
     @api_v1_post = Post.find(params[:id])
     @api_v1_post.destroy
 
-    respond_to do |format|
-      format.html { redirect_to api_v1_posts_url }
-      format.json { head :no_content }
-    end
+#respond_to do |format|
+#     format.html { redirect_to api_v1_posts_url }
+#     format.json { head :no_content }
+#   end
+    render :json => {}
   end
 end

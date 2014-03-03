@@ -40,17 +40,22 @@ class Api::V1::CommentVotesController < ApplicationController
   # POST /api/v1/comment_votes
   # POST /api/v1/comment_votes.json
   def create
-    @api_v1_comment_vote = CommentVote.new(params[:api_v1_comment_vote])
-
-    respond_to do |format|
-      if @api_v1_comment_vote.save
-        format.html { redirect_to @api_v1_comment_vote, notice: 'Comment vote was successfully created.' }
-        format.json { render json: @api_v1_comment_vote, status: :created, location: @api_v1_comment_vote }
-      else
-        format.html { render action: "new" }
-        format.json { render json: @api_v1_comment_vote.errors, status: :unprocessable_entity }
+      @api_v1_comment_vote=CommentVote.find_by_comment_id_and_user_id(params[:comment_vote][:comment_id], params[:comment_vote][:user_id])
+      if @api_v1_comment_vote.nil?
+          @api_v1_comment_vote = CommentVote.new(params[:comment_vote])
+          else
+          @api_v1_comment_vote.vote = params[:comment_vote][:vote]
       end
-    end
+      
+      respond_to do |format|
+          if @api_v1_comment_vote.save
+              #format.html { redirect_to @api_v1_post_vote, notice: 'Post vote was successfully created.' }
+              format.json { render json: @api_v1_comment_vote, status: :created }
+              else
+              #        format.html { render action: "new" }
+              format.json { render json: @api_v1_comment_vote.errors.messages.values, status: 400 }
+          end
+      end
   end
 
   # PUT /api/v1/comment_votes/1

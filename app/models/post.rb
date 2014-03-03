@@ -1,5 +1,5 @@
 class Post < ActiveRecord::Base
-  attr_accessible :content, :user_id
+    attr_accessible :content, :user_id,:lecture_id, :privacy, :time
   has_many :post_votes, :dependent => :destroy
   has_many :post_flags, :dependent => :destroy
   has_many :comments, :dependent => :destroy
@@ -31,4 +31,5 @@ class Post < ActiveRecord::Base
           return 1
       end
   end
+  
 end

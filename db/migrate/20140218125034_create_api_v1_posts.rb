@@ -1,8 +1,11 @@
 class CreateApiV1Posts < ActiveRecord::Migration
   def change
     create_table :posts do |t|
-      t.string :user_id
+      t.integer :user_id
       t.text :content
+      t.float :time
+      t.integer :lecture_id
+      t.string :privacy
 
       t.timestamps
     end
