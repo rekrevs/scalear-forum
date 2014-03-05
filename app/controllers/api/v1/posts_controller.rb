@@ -2,7 +2,14 @@ class Api::V1::PostsController < ApplicationController
   # GET /api/v1/posts
   # GET /api/v1/posts.json
   def index
-      @api_v1_posts = Post.includes(:post_votes).all
+      if(!params[:privacy]) #want all
+          @api_v1_posts = Post.includes(:post_votes).where(:lecture_id => params[:lecture_id])
+      else #only public and mine
+        @api_v1_posts = Post.includes(:post_votes).where(:lecture_id => params[:lecture_id], :user_id =>        params[:user_id]) #all mine
+        @api_v1_posts << Post.includes(:post_votes).where("lecture_id = ? and user_id != ? and privacy = ?",params[:lecture_id],params[:user_id], params[:privacy])
+        @api_v1_posts.flatten!
+      end
+
       @api_v1_posts.each do |a|
           a.current_user_id = params[:user_id]
       end
@@ -58,13 +65,13 @@ class Api::V1::PostsController < ApplicationController
   def create
     begin
       #json = JSON.parse(request.body.read)
-      puts params[:content]
-      puts params[:user_id]
-      puts "json isssss"
+      puts params[:post]
+      #puts params[:user_id]
+      #puts "json isssss"
       #puts json.inspect
-      post = Post.create(:user_id => params[:user_id],:content => params[:content] )
+      post = Post.create(params[:post] )
       if post.valid?
-        render :json => post.to_json
+        render :json => post.to_json(:methods => [:votes_count, :user_vote, :user_flag])
       else
         render :json => post.errors.to_json, :status => 400
       end
@@ -95,11 +102,14 @@ class Api::V1::PostsController < ApplicationController
   # DELETE /api/v1/posts/1.json
   def destroy
     @api_v1_post = Post.find(params[:id])
-    @api_v1_post.destroy
-
-    respond_to do |format|
-      format.html { redirect_to api_v1_posts_url }
-      format.json { head :no_content }
+    if @api_v1_post.user_id == params[:current_user_id].to_i  #can only delete my post
+        @api_v1_post.destroy
     end
+
+#respond_to do |format|
+#     format.html { redirect_to api_v1_posts_url }
+#     format.json { head :no_content }
+#   end
+    render :json => {}
   end
 end

@@ -51,22 +51,26 @@ end
   # POST /api/v1/post_votes.json
   #creates if doesn't exist, otherwise updates.
   def create
-    @api_v1_post_vote=PostVote.find_by_post_id_and_user_id(params[:post_vote][:post_id], params[:post_vote][:user_id])
-    if @api_v1_post_vote.nil?
-        @api_v1_post_vote = PostVote.new(params[:post_vote])
-    else
-        @api_v1_post_vote.vote = params[:post_vote][:vote]
-    end
+      if(Post.find(params[:post_vote][:post_id]).user_id != params[:post_vote][:user_id]) # only vote if it's not the same user who wrote the post!
+          @api_v1_post_vote=PostVote.find_by_post_id_and_user_id(params[:post_vote][:post_id], params[:post_vote][:user_id])
+          if @api_v1_post_vote.nil?
+              @api_v1_post_vote = PostVote.new(params[:post_vote])
+          else
+              @api_v1_post_vote.vote = params[:post_vote][:vote]
+          end
 
-    respond_to do |format|
-      if @api_v1_post_vote.save
+        respond_to do |format|
+            if @api_v1_post_vote.save
           #format.html { redirect_to @api_v1_post_vote, notice: 'Post vote was successfully created.' }
-        format.json { render json: @api_v1_post_vote, status: :created }
-      else
+                format.json { render json: @api_v1_post_vote, status: :created }
+            else
       #        format.html { render action: "new" }
-        format.json { render json: @api_v1_post_vote.errors.messages.values, status: 400 }
+                format.json { render json: @api_v1_post_vote.errors.messages.values, status: 400 }
+            end
+        end
+      else
+        render json: "Can't vote for yourself.", status: 400
       end
-    end
   end
 
   # PUT /api/v1/post_votes/1

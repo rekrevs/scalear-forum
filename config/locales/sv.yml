@@ -6,7 +6,5 @@ sv:
   activerecord:
         errors:
           models:
-            post_vote:
               already_voted: 'Du kan bara rösta en gång per post'
-            post_flag:
               already_flagged: 'Du kan bara flagga en gång per post'
