@@ -81,12 +81,15 @@ class Api::V1::CommentFlagsController < ApplicationController
   # DELETE /api/v1/comment_flags/1
   # DELETE /api/v1/comment_flags/1.json
   def destroy
-    @api_v1_comment_flag = CommentFlag.find(params[:id])
-    @api_v1_comment_flag.destroy
+    # @api_v1_comment_flag = CommentFlag.find(params[:id])
+    # @api_v1_comment_flag.destroy
 
-    respond_to do |format|
-      format.html { redirect_to api_v1_comment_flags_url }
-      format.json { head :no_content }
-    end
+    # respond_to do |format|
+    #   format.html { redirect_to api_v1_comment_flags_url }
+    #   format.json { head :no_content }
+    # end
+    @api_v1_comment_flag = CommentFlag.where(:comment_id => params[:id])
+    @api_v1_comment_flag.destroy_all
+    render :json => {}
   end
 end

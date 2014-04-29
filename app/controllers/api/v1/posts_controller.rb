@@ -5,8 +5,8 @@ class Api::V1::PostsController < ApplicationController
       if(!params[:privacy]) #want all
           @api_v1_posts = Post.includes(:post_votes).where(:lecture_id => params[:lecture_id])
       else #only public and mine
-        @api_v1_posts = Post.includes(:post_votes).where(:lecture_id => params[:lecture_id], :user_id =>        params[:user_id]) #all mine
-        @api_v1_posts << Post.includes(:post_votes).where("lecture_id = ? and user_id != ? and privacy = ?",params[:lecture_id],params[:user_id], params[:privacy])
+        @api_v1_posts = Post.includes(:post_votes, :post_flags).where(:lecture_id => params[:lecture_id], :user_id =>        params[:user_id]) #all mine
+        @api_v1_posts << Post.includes(:post_votes,:post_flags).where("lecture_id = ? and user_id != ? and privacy = ?",params[:lecture_id],params[:user_id], params[:privacy])
         @api_v1_posts.flatten!
       end
 
@@ -15,7 +15,7 @@ class Api::V1::PostsController < ApplicationController
       end
 
     respond_to do |format|
-        format.json { render json: @api_v1_posts.to_json(:methods => [:votes_count, :user_vote, :user_flag]) }
+        format.json { render json: @api_v1_posts.to_json(:methods => [:votes_count, :user_vote, :user_flag, :flags_count]) }
     end
   end
 
@@ -71,7 +71,7 @@ class Api::V1::PostsController < ApplicationController
       #puts json.inspect
       post = Post.create(params[:post] )
       if post.valid?
-        render :json => post.to_json(:methods => [:votes_count, :user_vote, :user_flag])
+        render :json => post.to_json(:methods => [:votes_count, :user_vote, :user_flag, :flags_count])
       else
         render :json => post.errors.to_json, :status => 400
       end
@@ -102,9 +102,9 @@ class Api::V1::PostsController < ApplicationController
   # DELETE /api/v1/posts/1.json
   def destroy
     @api_v1_post = Post.find(params[:id])
-    if @api_v1_post.user_id == params[:current_user_id].to_i  #can only delete my post
+    #if @api_v1_post.user_id == params[:current_user_id].to_i  #can only delete my post
         @api_v1_post.destroy
-    end
+    #end
 
 #respond_to do |format|
 #     format.html { redirect_to api_v1_posts_url }

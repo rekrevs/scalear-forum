@@ -81,12 +81,12 @@ class Api::V1::PostFlagsController < ApplicationController
   # DELETE /api/v1/post_flags/1
   # DELETE /api/v1/post_flags/1.json
   def destroy
-    @api_v1_post_flag = PostFlag.find(params[:id])
-    @api_v1_post_flag.destroy
-
-    respond_to do |format|
-      format.html { redirect_to api_v1_post_flags_url }
-      format.json { head :no_content }
-    end
+    @api_v1_post_flag = PostFlag.where(:post_id => params[:id])
+    @api_v1_post_flag.destroy_all
+    render :json => {}
+    # respond_to do |format|
+    #   format.html { redirect_to api_v1_post_flags_url }
+    #   format.json { head :no_content }
+    # end
   end
 end

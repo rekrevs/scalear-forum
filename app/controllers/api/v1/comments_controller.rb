@@ -12,7 +12,7 @@ class Api::V1::CommentsController < ApplicationController
     end
 
     respond_to do |format|
-      format.json { render json: @api_v1_comments.to_json(:methods => [:votes_count, :user_vote, :user_flag]) }
+      format.json { render json: @api_v1_comments.to_json(:methods => [:votes_count, :user_vote, :user_flag, :flags_count]) }
     end
   end
 
@@ -48,7 +48,7 @@ class Api::V1::CommentsController < ApplicationController
   def create
     @api_v1_comment = @post.comments.new(params[:comment])
     if @api_v1_comment.save
-        render :json => @api_v1_comment.to_json(:methods => [:votes_count, :user_vote, :user_flag])
+        render :json => @api_v1_comment.to_json(:methods => [:votes_count, :user_vote, :user_flag, :flags_count])
     else
         render :json => @api_v1_comment.errors.to_json, :status => 400
     end
@@ -74,9 +74,9 @@ class Api::V1::CommentsController < ApplicationController
   # DELETE /api/v1/comments/1.json
   def destroy
     @api_v1_comment = @post.comments.find(params[:id])
-    if @api_v1_comment.user_id == params[:current_user_id].to_i  #can only delete my comment
+    # if @api_v1_comment.user_id == params[:current_user_id].to_i  #can only delete my comment
         @api_v1_comment.destroy
-    end
+    # end
 
 #respond_to do |format|
 #      format.html { redirect_to api_v1_comments_url }
