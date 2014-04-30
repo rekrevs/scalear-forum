@@ -86,9 +86,10 @@ class Api::V1::PostsController < ApplicationController
   # PUT /api/v1/posts/1.json
   def update
     @api_v1_post = Post.find(params[:id])
-
+    params[:post].delete :created_at
+    params[:post].delete :updated_at
     respond_to do |format|
-      if @api_v1_post.update_attributes(params[:api_v1_post])
+      if @api_v1_post.update_attributes(params[:post])
         format.html { redirect_to @api_v1_post, notice: 'Post was successfully updated.' }
         format.json { head :no_content }
       else
