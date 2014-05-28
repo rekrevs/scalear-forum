@@ -35,7 +35,12 @@ namespace :api, defaults: {format: 'json'} do
     
     scope module: :v1, constraints: ApiConstraints.new(version: 1, default: :true) do
         resources :posts do
-            resources :comments
+          collection do
+            get 'count'
+            get 'where'
+            delete 'destroy_all'
+          end
+          resources :comments
         end
         resources :post_flags
         resources :post_votes
