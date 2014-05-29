@@ -38,7 +38,8 @@ namespace :api, defaults: {format: 'json'} do
           collection do
             get 'count'
             get 'where'
-            delete 'destroy_all'
+            delete 'destroy_all_by_user'
+            delete 'destroy_all_by_lecture'
           end
           resources :comments
         end

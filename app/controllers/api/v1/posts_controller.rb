@@ -122,8 +122,13 @@ class Api::V1::PostsController < ApplicationController
     render :json => Post.where(params[:query])
   end
 
-  def destroy_all
+  def destroy_all_by_user
     Post.destroy_all(:user_id => params[:user_id], :lecture_id => params[:lecture_id])
+    render :json => {}
+  end
+
+  def destroy_all_by_lecture
+    Post.destroy_all(:lecture_id => params[:lecture_id])
     render :json => {}
   end
 
