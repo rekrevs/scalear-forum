@@ -58,7 +58,8 @@ class Api::V1::CommentsController < ApplicationController
   # PUT /api/v1/comments/1.json
   def update
     @api_v1_comment = @post.comments.find(params[:id])
-
+    params[:comment].delete :created_at
+    params[:comment].delete :updated_at
     respond_to do |format|
       if @api_v1_comment.update_attributes(params[:comment])
         format.html { redirect_to @api_v1_comment, notice: 'Comment was successfully updated.' }

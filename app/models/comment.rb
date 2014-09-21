@@ -1,5 +1,5 @@
 class Comment < ActiveRecord::Base
-  attr_accessible :content,:lecture_id, :post_id, :user_id
+  attr_accessible :content,:lecture_id, :post_id, :user_id, :hide
   has_many :comment_votes, :dependent => :destroy
   has_many :comment_flags, :dependent => :destroy
   belongs_to :post
