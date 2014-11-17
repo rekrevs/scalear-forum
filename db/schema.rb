@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140918132630) do
+ActiveRecord::Schema.define(:version => 20141116112930) do
 
   create_table "comment_flags", :force => true do |t|
     t.integer  "comment_id"
@@ -59,9 +59,10 @@ ActiveRecord::Schema.define(:version => 20140918132630) do
     t.float    "time"
     t.integer  "lecture_id"
     t.string   "privacy"
-    t.datetime "created_at",                   :null => false
-    t.datetime "updated_at",                   :null => false
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
     t.boolean  "hide",       :default => true
+    t.boolean  "edited",     :default => false
   end
 
 end

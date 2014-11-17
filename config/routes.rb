@@ -40,6 +40,7 @@ namespace :api, defaults: {format: 'json'} do
             get 'where'
             delete 'destroy_all_by_user'
             delete 'destroy_all_by_lecture'
+            get 'column_names'
           end
           resources :comments
         end

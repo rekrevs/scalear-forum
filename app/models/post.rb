@@ -1,5 +1,5 @@
 class Post < ActiveRecord::Base
-    attr_accessible :content, :user_id,:lecture_id, :privacy, :time, :hide
+    attr_accessible :content, :user_id,:lecture_id, :privacy, :time, :hide, :edited
   has_many :post_votes, :dependent => :destroy
   has_many :post_flags, :dependent => :destroy
   has_many :comments, :dependent => :destroy
