@@ -12,6 +12,8 @@ end
 group :production do
   gem 'pg'
   gem 'newrelic_rpm'
+  gem 'puma'
+  gem "rack-timeout"
 end
 
 
@@ -28,6 +30,7 @@ group :assets do
 end
 
 gem 'jquery-rails'
+
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
