@@ -136,4 +136,43 @@ class Api::V1::PostsController < ApplicationController
     render :json => {}
   end
 
+  def posts_count
+    start_date = DateTime.parse(params[:start_date]).midnight
+    end_date = DateTime.parse(params[:end_date]).tomorrow
+
+    post = Post.includes(:comments).select { |e|  e.updated_at.between?(start_date,end_date) || e.comments.select{|c| c.updated_at.between?(start_date,end_date)}.size != 0 } 
+    # post = Post.includes(:comments).where("updated_at between ? and ? OR comments.updated_at between ? and ?", start_date , end_date, start_date , end_date)
+    # p post 
+    posts ={}
+    posts['courses'] ={}
+    courses = post.map { |p| p.course_id }.uniq
+    courses.each do |course_id|
+      posts['courses'][course_id] = post.select{|p| p.course_id == course_id}.size
+    end
+    posts['total_questions'] = post.count
+    posts['total_questions_students'] = post.map { |p| p.user_id }.uniq.count
+    posts['total_questions_courses'] = courses.count
+    posts['total_questions_lectures'] = post.map { |p| p.lecture_id }.uniq.count
+    posts['ids'] = Comment.includes(:post).find_all_by_post_id(post.map {|p|p.id}).map { |c| {"user_id" => c.user_id ,"course_id" => c.post.course_id}}.group_by{|c| c["course_id"]}
+
+    p "posts['idsposts['ids']p posts['ids']posts['ids']p posts['ids']posts['ids']p posts['ids']']p posts['ids']"
+    # p posts['ids']
+
+    # p posts['ids']
+    # posts['courses'] = courses
+    # group_posts_by_course = created_lec_views.includes([:lecture]).group('lecture_id').select('lecture_id ,course_id , (SUM(percent)) as percent ')
+
+    render :json => posts
+  end
+
+  def updated_post_course_group_ids
+# updated_post_course_group_id_without_updated at
+    Post.find_all_by_lecture_id(params[:lecture_id]).each do |post|
+       post.update_column(:course_id, params[:course_id])
+       post.update_column(:group_id, params[:group_id])
+    end
+    render :json => "ok"
+
+  end
+
 end
