@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141116112930) do
+ActiveRecord::Schema.define(:version => 20161017123851) do
 
   create_table "comment_flags", :force => true do |t|
     t.integer  "comment_id"
@@ -63,6 +63,8 @@ ActiveRecord::Schema.define(:version => 20141116112930) do
     t.datetime "updated_at",                    :null => false
     t.boolean  "hide",       :default => true
     t.boolean  "edited",     :default => false
+    t.integer  "course_id"
+    t.integer  "group_id"
   end
 
 end
