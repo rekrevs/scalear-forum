@@ -142,9 +142,9 @@ class Api::V1::PostsController < ApplicationController
     posts ={}
     posts['courses'] ={}
     posts['total_questions'] = 0
-    posts['total_questions_students'] = 0
-    posts['total_questions_courses'] = 0
-    posts['total_questions_lectures'] = 0
+    # posts['total_questions_students'] = 0
+    # posts['total_questions_courses'] = 0
+    # posts['total_questions_lectures'] = 0
     posts['ids'] = {}
 
     if params[:course_ids]
@@ -155,9 +155,11 @@ class Api::V1::PostsController < ApplicationController
         posts['courses'][course_id] = post.select{|p| p.course_id == course_id}.size
       end
       posts['total_questions'] = post.count
-      posts['total_questions_students'] = post.map { |p| p.user_id }.uniq.count
-      posts['total_questions_courses'] = courses.count
-      posts['total_questions_lectures'] = post.map { |p| p.lecture_id }.uniq.count
+      # posts['total_questions_students'] = post.map { |p| p.user_id }.uniq.count
+      # posts['total_questions_courses'] = courses.count
+      # posts['total_questions_lectures'] = post.map { |p| p.lecture_id }.uniq.count
+
+      
       posts['ids'] = Comment.includes(:post).find_all_by_post_id( post.map {|p|p.id} ).map { |c| {"user_id" => c.user_id ,"course_id" => c.post.course_id}}.group_by{|c| c["course_id"]}
     end
     # posts['courses'] = courses
