@@ -139,26 +139,27 @@ class Api::V1::PostsController < ApplicationController
   def posts_count
     start_date = DateTime.parse(params[:start_date]).midnight
     end_date = DateTime.parse(params[:end_date]).tomorrow
-
-    post = Post.includes(:comments).select { |e|  e.updated_at.between?(start_date,end_date) || e.comments.select{|c| c.updated_at.between?(start_date,end_date)}.size != 0 } 
-    # post = Post.includes(:comments).where("updated_at between ? and ? OR comments.updated_at between ? and ?", start_date , end_date, start_date , end_date)
-    # p post 
     posts ={}
     posts['courses'] ={}
-    courses = post.map { |p| p.course_id }.uniq
-    courses.each do |course_id|
-      posts['courses'][course_id] = post.select{|p| p.course_id == course_id}.size
+    posts['total_questions'] = 0
+    posts['total_questions_students'] = 0
+    posts['total_questions_courses'] = 0
+    posts['total_questions_lectures'] = 0
+    posts['ids'] = {}
+
+    if params[:course_ids]
+      post = Post.includes(:comments).select { |e| (params[:course_ids].include?(e.course_id.to_s)) && (e.updated_at.between?(start_date,end_date) || e.comments.select{|c| c.updated_at.between?(start_date,end_date)}.size != 0) } 
+      # post = Post.includes(:comments).where("updated_at between ? and ? OR comments.updated_at between ? and ?", start_date , end_date, start_date , end_date)
+      courses = post.map { |p| p.course_id }.uniq
+      courses.each do |course_id|
+        posts['courses'][course_id] = post.select{|p| p.course_id == course_id}.size
+      end
+      posts['total_questions'] = post.count
+      posts['total_questions_students'] = post.map { |p| p.user_id }.uniq.count
+      posts['total_questions_courses'] = courses.count
+      posts['total_questions_lectures'] = post.map { |p| p.lecture_id }.uniq.count
+      posts['ids'] = Comment.includes(:post).find_all_by_post_id( post.map {|p|p.id} ).map { |c| {"user_id" => c.user_id ,"course_id" => c.post.course_id}}.group_by{|c| c["course_id"]}
     end
-    posts['total_questions'] = post.count
-    posts['total_questions_students'] = post.map { |p| p.user_id }.uniq.count
-    posts['total_questions_courses'] = courses.count
-    posts['total_questions_lectures'] = post.map { |p| p.lecture_id }.uniq.count
-    posts['ids'] = Comment.includes(:post).find_all_by_post_id(post.map {|p|p.id}).map { |c| {"user_id" => c.user_id ,"course_id" => c.post.course_id}}.group_by{|c| c["course_id"]}
-
-    p "posts['idsposts['ids']p posts['ids']posts['ids']p posts['ids']posts['ids']p posts['ids']']p posts['ids']"
-    # p posts['ids']
-
-    # p posts['ids']
     # posts['courses'] = courses
     # group_posts_by_course = created_lec_views.includes([:lecture]).group('lecture_id').select('lecture_id ,course_id , (SUM(percent)) as percent ')
 
