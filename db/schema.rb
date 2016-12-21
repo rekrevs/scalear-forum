@@ -21,7 +21,7 @@ ActiveRecord::Schema.define(:version => 20161017123851) do
   end
 
   create_table "comment_votes", :force => true do |t|
-    t.string   "user_id"
+    t.integer  "user_id"
     t.integer  "comment_id"
     t.integer  "vote"
     t.datetime "created_at", :null => false
@@ -39,14 +39,14 @@ ActiveRecord::Schema.define(:version => 20161017123851) do
   end
 
   create_table "post_flags", :force => true do |t|
-    t.string   "user_id"
+    t.integer  "user_id"
     t.integer  "post_id"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
   end
 
   create_table "post_votes", :force => true do |t|
-    t.string   "user_id"
+    t.integer  "user_id"
     t.integer  "post_id"
     t.integer  "vote"
     t.datetime "created_at", :null => false
