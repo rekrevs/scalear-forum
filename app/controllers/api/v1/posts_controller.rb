@@ -61,7 +61,7 @@ class Api::V1::PostsController < ApplicationController
   #    end
   #  end
   #end
-  
+
   def create
     begin
       #json = JSON.parse(request.body.read)
@@ -80,7 +80,7 @@ class Api::V1::PostsController < ApplicationController
       render :json => e.message.to_json, :status => 500
     end
   end
-      
+
 
   # PUT /api/v1/posts/1
   # PUT /api/v1/posts/1.json
@@ -139,32 +139,19 @@ class Api::V1::PostsController < ApplicationController
   def posts_count
     start_date = DateTime.parse(params[:start_date]).midnight
     end_date = DateTime.parse(params[:end_date]).tomorrow
-    posts ={}
-    posts['courses'] ={}
-    posts['total_questions'] = 0
-    # posts['total_questions_students'] = 0
-    # posts['total_questions_courses'] = 0
-    # posts['total_questions_lectures'] = 0
-    posts['ids'] = {}
+    posts ={'courses' => {}, 'total_questions' => 0, 'comments_user_id'=> {}}
 
     if params[:course_ids]
-      post = Post.includes(:comments).select { |e| (params[:course_ids].include?(e.course_id.to_s)) && (e.updated_at.between?(start_date,end_date) || e.comments.select{|c| c.updated_at.between?(start_date,end_date)}.size != 0) } 
-      # post = Post.includes(:comments).where("updated_at between ? and ? OR comments.updated_at between ? and ?", start_date , end_date, start_date , end_date)
-      courses = post.map { |p| p.course_id }.uniq
-      courses.each do |course_id|
-        posts['courses'][course_id] = post.select{|p| p.course_id == course_id}.size
+      all_posts = Post.joins("left outer join comments on posts.id =comments.post_id").select("posts.id, comments.user_id cu, course_id").where("posts.course_id IN (?) AND (posts.updated_at between ? and ? OR comments.updated_at between ? and ?)", params[:course_ids], start_date, end_date, start_date, end_date).group_by{|f| f.course_id}
+
+      all_posts.each do |course_id,values|
+        count = values.map(&:id).uniq.size
+        comments_user_id = values.map(&:cu).uniq.select{|v| !v.nil?}
+        posts['courses'][course_id] = count
+        posts['total_questions'] += count
+        posts['comments_user_id'][course_id] =comments_user_id if comments_user_id.size > 0
       end
-      posts['total_questions'] = post.count
-      # posts['total_questions_students'] = post.map { |p| p.user_id }.uniq.count
-      # posts['total_questions_courses'] = courses.count
-      # posts['total_questions_lectures'] = post.map { |p| p.lecture_id }.uniq.count
-
-      
-      posts['ids'] = Comment.includes(:post).find_all_by_post_id( post.map {|p|p.id} ).map { |c| {"user_id" => c.user_id ,"course_id" => c.post.course_id}}.group_by{|c| c["course_id"]}
     end
-    # posts['courses'] = courses
-    # group_posts_by_course = created_lec_views.includes([:lecture]).group('lecture_id').select('lecture_id ,course_id , (SUM(percent)) as percent ')
-
     render :json => posts
   end
 
