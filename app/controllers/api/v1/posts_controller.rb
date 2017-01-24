@@ -156,24 +156,24 @@ class Api::V1::PostsController < ApplicationController
   end
 
   def posts_unanswered_questions
-    # posts = Post.where(' group_id = ? AND comments_count = ?' , params[:group_id] , 0)
-    # posts_ids =Post.where(:group_id=>params[:group_id]).joins("left outer join comments on posts.id =comments.post_id").group('posts.id').having('count(comments.id) = 0').map { |e| e.id  }
-    # posts = Post.find(posts_ids).select{:}.group_by{|c| c.lecture_id}
-    # posts 
     posts_total = Post.where(:group_id=>params[:group_id]).count 
     posts_unanswered = Post.where(:group_id=>params[:group_id]).joins("left outer join comments on posts.id =comments.post_id").group('posts.id').having('count(comments.id) = 0')
     posts_total_unanswered = 0 
     posts_unanswered.count.each{|post_lecture_count| posts_total_unanswered+=post_lecture_count[1].to_i} 
-    # p posts_total
-    # p posts_unanswered.count
 
     posts = posts_unanswered.select("posts.content , posts.lecture_id ,posts.privacy").group_by{|c| c.lecture_id}
-    # posts =Post.where(:group_id=>6383).joins("left outer join comments on posts.id =comments.post_id").group('posts.id').having('count(comments.id) = 0')
     render :json => {posts: posts , posts_total:posts_total , posts_total_unanswered:posts_total_unanswered }
-    
-  # all_posts = Post.joins("left outer join comments on posts.id =comments.post_id").where("posts.group_id = (?) AND (posts.updated_at between ? and ? OR comments.updated_at between ? and ?)", params[:group_id], start_date, end_date, start_date, end_date)
-
   end
+
+  def get_questions_replies
+    raw_posts = Post.where(:group_id=>params[:group_id],:user_id=>params[:user_id])
+    posts_total = raw_posts.count 
+    posts_answered = raw_posts.select{|a| a.comments.count != 0}.count 
+    # posts = {}
+    posts = raw_posts.joins("left outer join comments on posts.id =comments.post_id").select(" posts.content AS post_content, posts.lecture_id AS lecture_id , posts.privacy AS privacy , comments.user_id AS user_id  , comments.content AS comment_content").group_by{|c| c.lecture_id}
+    render :json => {posts: posts , posts_total:posts_total , posts_answered:posts_answered }
+  end
+  
 
 
   def updated_post_course_group_ids
