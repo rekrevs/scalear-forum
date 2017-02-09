@@ -139,15 +139,17 @@ class Api::V1::PostsController < ApplicationController
   def posts_count
     start_date = DateTime.parse(params[:start_date]).midnight
     end_date = DateTime.parse(params[:end_date]).tomorrow
-    posts ={'courses' => {}, 'total_questions' => 0, 'comments_user_id'=> {}}
+    posts ={'active_courses' => {},'total_courses' => {} ,'total_questions' => 0, 'comments_user_id'=> {}}
 
     if params[:course_ids]
-      all_posts = Post.joins("left outer join comments on posts.id =comments.post_id").select("posts.id, comments.user_id cu, course_id").where("posts.course_id IN (?) AND (posts.updated_at between ? and ? OR comments.updated_at between ? and ?)", params[:course_ids], start_date, end_date, start_date, end_date).group_by{|f| f.course_id}
+      active_posts = Post.joins("left outer join comments on posts.id =comments.post_id").select("posts.id, comments.user_id cu, course_id").where("posts.course_id IN (?) AND (posts.updated_at between ? and ? OR comments.updated_at between ? and ?)", params[:course_ids], start_date, end_date, start_date, end_date).group_by{|f| f.course_id}
+      total_posts = Post.where("posts.course_id IN (?)", params[:course_ids]).group('course_id').select('course_id , (COUNT(*)) as count').group_by(&:course_id)
 
-      all_posts.each do |course_id,values|
+      active_posts.each do |course_id,values|
         count = values.map(&:id).uniq.size
         comments_user_id = values.map(&:cu).uniq.select{|v| !v.nil?}
-        posts['courses'][course_id] = count
+        posts['active_courses'][course_id] = count
+        posts['total_courses'][course_id] =  total_posts[course_id][0].count.to_i
         posts['total_questions'] += count
         posts['comments_user_id'][course_id] =comments_user_id if comments_user_id.size > 0
       end
