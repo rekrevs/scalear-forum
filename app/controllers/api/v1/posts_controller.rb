@@ -168,7 +168,11 @@ class Api::V1::PostsController < ApplicationController
   end
 
   def get_questions_replies
-    raw_posts = Post.where(:group_id=>params[:group_id],:user_id=>params[:user_id])
+    if params[:user_id]
+      raw_posts = Post.where(:group_id=>params[:group_id],:user_id=>params[:user_id])
+    else
+      raw_posts = Post.where(:group_id=>params[:group_id])
+    end
     posts_total = raw_posts.count
     posts_answered = raw_posts.select{|a| a.comments.count != 0}.count
     # posts = {}
