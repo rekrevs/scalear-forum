@@ -176,7 +176,7 @@ class Api::V1::PostsController < ApplicationController
     posts_total = raw_posts.count
     posts_answered = raw_posts.select{|a| a.comments.count != 0}.count
     # posts = {}
-    posts = raw_posts.joins("left outer join comments on posts.id =comments.post_id").select("posts.group_id, posts.time,  posts.content AS post_content, posts.lecture_id AS lecture_id , posts.privacy AS privacy , comments.user_id AS user_id  , comments.content AS comment_content").group_by{|c| c.lecture_id}
+    posts = raw_posts.joins("left outer join comments on posts.id =comments.post_id").select("posts.group_id, posts.time, posts.id AS id,  posts.content AS post_content, posts.lecture_id AS lecture_id , posts.privacy AS privacy , comments.user_id AS user_id  , comments.content AS comment_content").group_by{|c| c.lecture_id}
     render :json => {posts: posts , posts_total:posts_total , posts_answered:posts_answered }
   end
 
