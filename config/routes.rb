@@ -42,6 +42,8 @@ namespace :api, defaults: {format: 'json'} do
             delete 'destroy_all_by_lecture'
             get 'column_names'
             get 'posts_count'
+            get 'posts_unanswered_questions'
+            get 'get_questions_replies'
             post 'updated_post_course_group_ids'
           end
           resources :comments

@@ -139,21 +139,48 @@ class Api::V1::PostsController < ApplicationController
   def posts_count
     start_date = DateTime.parse(params[:start_date]).midnight
     end_date = DateTime.parse(params[:end_date]).tomorrow
-    posts ={'courses' => {}, 'total_questions' => 0, 'comments_user_id'=> {}}
+    posts ={'active_courses' => {},'total_courses' => {} ,'total_questions' => 0, 'comments_user_id'=> {}}
 
     if params[:course_ids]
-      all_posts = Post.joins("left outer join comments on posts.id =comments.post_id").select("posts.id, comments.user_id cu, course_id").where("posts.course_id IN (?) AND (posts.updated_at between ? and ? OR comments.updated_at between ? and ?)", params[:course_ids], start_date, end_date, start_date, end_date).group_by{|f| f.course_id}
+      active_posts = Post.joins("left outer join comments on posts.id =comments.post_id").select("posts.id, comments.user_id cu, course_id").where("posts.course_id IN (?) AND (posts.updated_at between ? and ? OR comments.updated_at between ? and ?)", params[:course_ids], start_date, end_date, start_date, end_date).group_by{|f| f.course_id}
+      total_posts = Post.where("posts.course_id IN (?)", params[:course_ids]).group('course_id').select('course_id , (COUNT(*)) as count').group_by(&:course_id)
 
-      all_posts.each do |course_id,values|
+      active_posts.each do |course_id,values|
         count = values.map(&:id).uniq.size
         comments_user_id = values.map(&:cu).uniq.select{|v| !v.nil?}
-        posts['courses'][course_id] = count
+        posts['active_courses'][course_id] = count
+        posts['total_courses'][course_id] =  total_posts[course_id][0].count.to_i
         posts['total_questions'] += count
         posts['comments_user_id'][course_id] =comments_user_id if comments_user_id.size > 0
       end
     end
     render :json => posts
   end
+
+  def posts_unanswered_questions
+    posts_total = Post.where(:group_id=>params[:group_id]).count
+    posts_unanswered = Post.where(:group_id=>params[:group_id]).joins("left outer join comments on posts.id =comments.post_id").group('posts.id').having('count(comments.id) = 0')
+    posts_total_unanswered = 0
+    posts_unanswered.count.each{|post_lecture_count| posts_total_unanswered+=post_lecture_count[1].to_i}
+
+    posts = posts_unanswered.select("posts.id, posts.content , posts.lecture_id ,posts.privacy").group_by{|c| c.lecture_id}
+    render :json => {posts: posts , posts_total:posts_total , posts_total_unanswered:posts_total_unanswered }
+  end
+
+  def get_questions_replies
+    if params[:user_id]
+      raw_posts = Post.where(:group_id=>params[:group_id],:user_id=>params[:user_id])
+    else
+      raw_posts = Post.where(:group_id=>params[:group_id])
+    end
+    posts_total = raw_posts.count
+    posts_answered = raw_posts.select{|a| a.comments.count != 0}.count
+    # posts = {}
+    posts = raw_posts.joins("left outer join comments on posts.id =comments.post_id").select("posts.group_id, posts.time, posts.id AS id,  posts.content AS post_content, posts.lecture_id AS lecture_id , posts.privacy AS privacy , comments.user_id AS user_id  , comments.content AS comment_content").group_by{|c| c.lecture_id}
+    render :json => {posts: posts , posts_total:posts_total , posts_answered:posts_answered }
+  end
+
+
 
   def updated_post_course_group_ids
 # updated_post_course_group_id_without_updated at

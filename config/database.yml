@@ -12,7 +12,7 @@ development:
   adapter: postgresql
   encoding: unicode
   database: post_development_production
-  username: ahmed
+  username: ubuntu
   # host: localhost
   pool: 5
   timeout: 5000
