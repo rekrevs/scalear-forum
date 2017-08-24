@@ -163,11 +163,12 @@ class Api::V1::PostsController < ApplicationController
     posts ={'inclass_review_show_questions' => {},'questions_count' => {} , 'comments_user_id'=> {}}
 
     if params[:course_ids]
-      active_posts = Post.joins("left outer join comments on posts.id =comments.post_id").select("posts.id, posts.hide , comments.user_id cu, course_id").group_by{|f| f.course_id}
+      active_posts = Post.joins("left outer join comments on posts.id =comments.post_id").select("posts.id, posts.hide , comments.user_id cu, course_id").where("posts.course_id IN (?) ", params[:course_ids]).group_by{|f| f.course_id}
       active_posts.each do |course_id,values|
         count = values.map(&:id).uniq.size 
         count_inclass = values.map(&:hide).count(false) rescue 0
-        comments_user_id = values.map(&:cu).uniq.select{|v| !v.nil?}
+        # comments_user_id = values.map(&:cu).uniq.select{|v| !v.nil?}
+        comments_user_id = values.uniq{|m| "#{m[:cu]}-#{m[:id]}"}.map(&:cu).select{|v| !v.nil?}
         posts['questions_count'][course_id] =  count
         posts['inclass_review_show_questions'][course_id] = count_inclass
         posts['comments_user_id'][course_id] =comments_user_id if comments_user_id.size > 0
