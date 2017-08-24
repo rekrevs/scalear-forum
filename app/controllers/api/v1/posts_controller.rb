@@ -142,7 +142,7 @@ class Api::V1::PostsController < ApplicationController
     posts ={'active_courses' => {},'total_courses' => {} ,'total_questions' => 0, 'comments_user_id'=> {}}
 
     if params[:course_ids]
-      active_posts = Post.joins("left outer join comments on posts.id =comments.post_id").select("posts.id, comments.user_id cu, course_id").where("posts.course_id IN (?) AND (posts.updated_at between ? and ? OR comments.updated_at between ? and ?)", params[:course_ids], start_date, end_date, start_date, end_date).group_by{|f| f.course_id}
+      active_posts = Post.joins("left outer join comments on posts.id =comments.post_id").select("posts.id, comments.user_id cu, course_id").where("posts.course_id IN (?) AND (posts.updated_at between ? and ? OR comments.updated_at between ? and ?)", params[:course_ids], start_date, end_date).group_by{|f| f.course_id}
       total_posts = Post.where("posts.course_id IN (?)", params[:course_ids]).group('course_id').select('course_id , (COUNT(*)) as count').group_by(&:course_id)
 
       active_posts.each do |course_id,values|
@@ -154,6 +154,26 @@ class Api::V1::PostsController < ApplicationController
         posts['comments_user_id'][course_id] =comments_user_id if comments_user_id.size > 0
       end
     end
+    render :json => posts
+  end
+
+  def analytics_student_questions
+    # start_date = DateTime.parse(params[:start_date]).midnight
+    # end_date = DateTime.parse(params[:end_date]).tomorrow
+    posts ={'inclass_review_show_questions' => {},'questions_count' => {} , 'comments_user_id'=> {}}
+
+    if params[:course_ids]
+      active_posts = Post.joins("left outer join comments on posts.id =comments.post_id").select("posts.id, posts.hide , comments.user_id cu, course_id").group_by{|f| f.course_id}
+      active_posts.each do |course_id,values|
+        count = values.map(&:id).uniq.size 
+        count_inclass = values.map(&:hide).count(false) rescue 0
+        comments_user_id = values.map(&:cu).uniq.select{|v| !v.nil?}
+        posts['questions_count'][course_id] =  count
+        posts['inclass_review_show_questions'][course_id] = count_inclass
+        posts['comments_user_id'][course_id] =comments_user_id if comments_user_id.size > 0
+      end
+    end
+    # p posts
     render :json => posts
   end
 
