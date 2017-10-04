@@ -142,16 +142,16 @@ class Api::V1::PostsController < ApplicationController
     posts ={'active_courses' => {},'total_courses' => {} ,'total_questions' => 0, 'comments_user_id'=> {}}
 
     if params[:course_ids]
-      active_posts = Post.joins("left outer join comments on posts.id =comments.post_id").select("posts.id, comments.user_id cu, course_id").where("posts.course_id IN (?) AND (posts.updated_at between ? and ? OR comments.updated_at between ? and ?)", params[:course_ids], start_date, end_date, start_date, end_date).group_by{|f| f.course_id}
-      total_posts = Post.where("posts.course_id IN (?)", params[:course_ids]).group('course_id').select('course_id , (COUNT(*)) as count').group_by(&:course_id)
+      total_posts = Post.where("posts.course_id IN (?)", params[:course_ids]).group('course_id').count
+      active_courses_posts_count = Post.where("course_id IN (?) AND (updated_at between ? and ? )", params[:course_ids], start_date, end_date).group('course_id').count
+      active_courses_comments_count = Comment.joins("join posts on posts.id =comments.post_id").where("posts.course_id IN (?) AND (comments.updated_at between ? and ? )",params[:course_ids], start_date, end_date).select('posts.course_id cid,posts.id pid,comments.user_id').uniq.group_by{|a| a.cid}
 
-      active_posts.each do |course_id,values|
-        count = values.map(&:id).uniq.size
-        comments_user_id = values.map(&:cu).uniq.select{|v| !v.nil?}
-        posts['active_courses'][course_id] = count
-        posts['total_courses'][course_id] =  total_posts[course_id][0].count.to_i
-        posts['total_questions'] += count
-        posts['comments_user_id'][course_id] =comments_user_id if comments_user_id.size > 0
+      params[:course_ids].each do |course_id,values|
+        comments_user_id = active_courses_comments_count[course_id.to_s].nil? ? [] : active_courses_comments_count[course_id.to_s].map{ |a| a.user_id }
+        posts['active_courses'][course_id] = active_courses_posts_count[course_id.to_i] || 0
+        posts['total_questions'] += active_courses_posts_count[course_id.to_i] || 0
+        posts['total_courses'][course_id] =  total_posts[course_id.to_i] || 0
+        posts['comments_user_id'][course_id] = comments_user_id if comments_user_id.size > 0
       end
     end
     render :json => posts
