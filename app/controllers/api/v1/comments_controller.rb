@@ -1,5 +1,5 @@
 class Api::V1::CommentsController < ApplicationController
-    
+
   before_filter :load_parent
   # GET /api/v1/comments
   # GET /api/v1/comments.json
@@ -85,11 +85,10 @@ class Api::V1::CommentsController < ApplicationController
 #    end
       render :json => {}
   end
-  
-  
-  
+
+
   private
-  
+
   def load_parent
       @post = Post.find(params[:post_id])
    end

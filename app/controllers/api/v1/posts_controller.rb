@@ -128,6 +128,7 @@ class Api::V1::PostsController < ApplicationController
 
   def destroy_all_by_user
     Post.destroy_all(:user_id => params[:user_id], :lecture_id => params[:lecture_id])
+    Comment.destroy_all(:user_id => params[:user_id], :lecture_id => params[:lecture_id])
     render :json => {}
   end
 
@@ -165,7 +166,7 @@ class Api::V1::PostsController < ApplicationController
     if params[:course_ids]
       active_posts = Post.joins("left outer join comments on posts.id =comments.post_id").select("posts.id, posts.hide , comments.user_id cu, course_id").where("posts.course_id IN (?) ", params[:course_ids]).group_by{|f| f.course_id}
       active_posts.each do |course_id,values|
-        count = values.map(&:id).uniq.size 
+        count = values.map(&:id).uniq.size
         count_inclass = values.map(&:hide).count(false) rescue 0
         # comments_user_id = values.map(&:cu).uniq.select{|v| !v.nil?}
         comments_user_id = values.uniq{|m| "#{m[:cu]}-#{m[:id]}"}.map(&:cu).select{|v| !v.nil?}

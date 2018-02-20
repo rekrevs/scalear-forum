@@ -28,17 +28,17 @@ scope "(:locale)", locale: /en|sv/ do
 
 #This method, you just call api/posts , and in the headers you have an accept parameter set to: application/vnd.example.v1  for version 1. Default is last version
 namespace :api, defaults: {format: 'json'} do
-   
+
     scope module: :v2, constraints: ApiConstraints.new(version: 2) do #, default: :true
         resources :posts
     end
-    
+
     scope module: :v1, constraints: ApiConstraints.new(version: 1, default: :true) do
         resources :posts do
           collection do
             get 'count'
             get 'where'
-            delete 'destroy_all_by_user'
+            delete 'destroy_all_by_user' #delete posts and all its comments
             delete 'destroy_all_by_lecture'
             get 'column_names'
             get 'posts_count'
@@ -48,13 +48,15 @@ namespace :api, defaults: {format: 'json'} do
             post 'updated_post_course_group_ids'
           end
           resources :comments
+
+
         end
         resources :post_flags
         resources :post_votes
         resources :comment_flags
         resources :comment_votes
     end
-    
+
 end
 
 
