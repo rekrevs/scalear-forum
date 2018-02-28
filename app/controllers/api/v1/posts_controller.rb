@@ -118,6 +118,14 @@ class Api::V1::PostsController < ApplicationController
     render :json => Post.count
   end
 
+  def comments_all
+    render :json => Comment.all
+  end
+
+  def distinct_user_ids_of_all_comments
+    render :json => Comment.uniq.pluck(:user_id)
+  end
+
   def where
     render :json => Post.where(params[:query])
   end
@@ -135,6 +143,15 @@ class Api::V1::PostsController < ApplicationController
   def destroy_all_by_lecture
     Post.destroy_all(:lecture_id => params[:lecture_id])
     render :json => {}
+  end
+
+  def delete_comments_by_user_ids
+
+
+     comment_ids = Comment.select(:id).where(:user_id=>params[:ids_array]).map{|comment| comment.id}
+     Comment.delete(comment_ids)
+
+     render :json => {}
   end
 
   def posts_count

@@ -37,6 +37,9 @@ namespace :api, defaults: {format: 'json'} do
         resources :posts do
           collection do
             get 'count'
+            get 'comments_all'
+            get 'distinct_user_ids_of_all_comments'
+            get 'delete_comments_by_user_ids'
             get 'where'
             delete 'destroy_all_by_user' #delete posts and all its comments
             delete 'destroy_all_by_lecture'
