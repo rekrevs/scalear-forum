@@ -118,6 +118,14 @@ class Api::V1::PostsController < ApplicationController
     render :json => Post.count
   end
 
+  def comments_all
+    render :json => Comment.all
+  end
+
+  def distinct_user_ids_of_all_comments
+    render :json => Comment.uniq.pluck(:user_id)
+  end
+
   def where
     render :json => Post.where(params[:query])
   end
@@ -128,12 +136,19 @@ class Api::V1::PostsController < ApplicationController
 
   def destroy_all_by_user
     Post.destroy_all(:user_id => params[:user_id], :lecture_id => params[:lecture_id])
+    Comment.destroy_all(:user_id => params[:user_id], :lecture_id => params[:lecture_id])
     render :json => {}
   end
 
   def destroy_all_by_lecture
     Post.destroy_all(:lecture_id => params[:lecture_id])
     render :json => {}
+  end
+
+  def delete_comments_by_user_ids
+     comment_ids = Comment.select(:id).where(:user_id=>params[:ids_array]).map{|comment| comment.id}
+     Comment.delete(comment_ids)
+     render :json => {}
   end
 
   def posts_count
@@ -165,7 +180,7 @@ class Api::V1::PostsController < ApplicationController
     if params[:course_ids]
       active_posts = Post.joins("left outer join comments on posts.id =comments.post_id").select("posts.id, posts.hide , comments.user_id cu, course_id").where("posts.course_id IN (?) ", params[:course_ids]).group_by{|f| f.course_id}
       active_posts.each do |course_id,values|
-        count = values.map(&:id).uniq.size 
+        count = values.map(&:id).uniq.size
         count_inclass = values.map(&:hide).count(false) rescue 0
         # comments_user_id = values.map(&:cu).uniq.select{|v| !v.nil?}
         comments_user_id = values.uniq{|m| "#{m[:cu]}-#{m[:id]}"}.map(&:cu).select{|v| !v.nil?}
