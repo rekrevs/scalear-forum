@@ -146,11 +146,8 @@ class Api::V1::PostsController < ApplicationController
   end
 
   def delete_comments_by_user_ids
-
-
      comment_ids = Comment.select(:id).where(:user_id=>params[:ids_array]).map{|comment| comment.id}
      Comment.delete(comment_ids)
-
      render :json => {}
   end
 
