@@ -38,6 +38,7 @@ namespace :api, defaults: {format: 'json'} do
           collection do
             get 'count'
             get 'where'
+            get 'user_posts'
             delete 'destroy_all_by_user'
             delete 'destroy_all_by_lecture'
             get 'column_names'
