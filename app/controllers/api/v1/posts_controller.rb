@@ -122,6 +122,10 @@ class Api::V1::PostsController < ApplicationController
     render :json => Post.where(params[:query])
   end
 
+  def user_posts
+    render :json => Post.where(user_id: params[:user_id].to_i)
+  end
+  
   def column_names
     render :json => Post.column_names
   end
